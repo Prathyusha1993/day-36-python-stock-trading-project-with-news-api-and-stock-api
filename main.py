@@ -33,4 +33,21 @@ diff_percent = (difference / float(yesterday_closing_price)) * 100
 print(diff_percent)
 
 if abs(diff_percent) > 1:
-    pass
+    news_parameters = {
+        'apiKey': os.getenv("API_KEY_FOR_NEWS"),
+        'qInTitle': COMPANY_NAME
+    }
+    response_for_news = requests.get('https://newsapi.org/v2/everything', params=news_parameters)
+    response_for_news.raise_for_status()
+    articles = response_for_news.json()['articles']
+    three_articles = articles[0:3]
+    print(three_articles)
+
+    formatted_articles = [f"Headline: {article['title']}. \nBrief:{article['description']}" for article in
+                          three_articles]
+    message = "Subject: About Stocks\n\n" + "\n\n".join(formatted_articles)
+    with smtplib.SMTP('smtp.gmail.com', port=587) as connection:
+        connection.starttls()
+        connection.login(os.getenv("MY_EMAIL"), os.getenv("MY_PASSWORD"))
+        connection.sendmail(from_addr=os.getenv("MY_EMAIL"), to_addrs=os.getenv("MY_EMAIL"), msg=message.encode("utf-8"))
+
