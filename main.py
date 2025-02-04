@@ -2,9 +2,13 @@ import requests
 import smtplib
 import os
 from dotenv import load_dotenv
+from twilio.rest import Client
 
 STOCK = 'TSLA'
 COMPANY_NAME = 'Tesla Inc'
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 
 load_dotenv()
 
@@ -45,9 +49,14 @@ if abs(diff_percent) > 1:
 
     formatted_articles = [f"Headline: {article['title']}. \nBrief:{article['description']}" for article in
                           three_articles]
+    # do smtp or twilio
     message = "Subject: About Stocks\n\n" + "\n\n".join(formatted_articles)
     with smtplib.SMTP('smtp.gmail.com', port=587) as connection:
         connection.starttls()
         connection.login(os.getenv("MY_EMAIL"), os.getenv("MY_PASSWORD"))
         connection.sendmail(from_addr=os.getenv("MY_EMAIL"), to_addrs=os.getenv("MY_EMAIL"), msg=message.encode("utf-8"))
 
+    # twilio as sms
+    # client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    # for article in formatted_articles:
+    #     message = client.messages.create(body = article, from_ = "+18445438763", to ="+15103207767")
